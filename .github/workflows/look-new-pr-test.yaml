@@ -72,7 +72,7 @@ jobs:
                   });
                 }
                 if (releaseImageTag == "" || releaseImageTag != prHeadHash) {
-                  clone(pullrequest.head.repo.clone_url, `./searxng-${prNumber}`, {checkout: pullrequest.head.ref });
+                  await clone(pullrequest.head.repo.clone_url, `./searxng-${prNumber}`, {checkout: pullrequest.head.ref });
                   const optionsExec = {
                     cwd: `./searxng-${prNumber}`
                   }
