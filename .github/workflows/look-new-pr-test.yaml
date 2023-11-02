@@ -1,0 +1,99 @@
+name: Look for new PR with label preview-environment
+
+on:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    name: Check whether a new PR has label preview-environment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Helm Installation
+        uses: azure/setup-helm@v3
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+      - name: install npm packages and kubernetes
+        run: |
+          npm install @kubernetes/client-node nodejs-helm bluebird git-clone
+          mkdir -p ~/.kube
+          echo "$KUBECONFIG_TEXT" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          helm repo add searxng https://charts.searxng.org
+          helm repo update
+      - name: Login to Quay.io
+        uses: docker/login-action@v2
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+      - name: Check whether a new PR has label preview-environment
+        uses: actions/github-script@v6
+        id: prs-to-preview
+        with:
+          github-token: ${{ secrets.GH_PAT }}
+          script: |
+            const k8s = require('@kubernetes/client-node');
+            const helm = require('nodejs-helm');
+            const clone = require('git-clone/promise');
+            const util = require('util');
+            const exec = util.promisify(require('child_process').exec);
+            let Promise = require("bluebird");
+
+            const Helm = require("nodejs-helm").Helm;
+            let helm = Promise.promisifyAll(new Helm({helmCommand: "helm"}));
+
+            const kc = new k8s.KubeConfig();
+            kc.loadFromDefault();
+            const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+            const pullrequests = await github.rest.pulls.list({
+              owner: "searxng",
+              repo: "searxng",
+            })
+            for (const pullrequest of pullrequests.data) {
+              if (pullrequest.labels.some(item => item.name === preview-environment')) {
+                const prNumber = pullrequest.number;
+                const prHeadHash = pullrequest.head.sha;
+                const optionsGetReleaseInfo = {
+                    releaseName: 'searxng-preview',
+                    subCommand: 'all',
+                    namespace: `searxng-${prNumber}`
+                }
+                let releaseImageTag = "";
+                try {
+                  releaseImageTag = (await helm.getAsync(optionsGetReleaseInfo))[0].image.tag;
+                } catch (error) {
+                  await k8sApi.createNamespace(`searxng-${prNumber}`);
+                }
+                console currentDeployedReleases = await helm.listAsync(optionsGetReleases));
+                if (releaseImageTag == "" or releaseImageTag != prHeadHash)) {
+                  clone(pullrequest.head.repo.clone_url, `searxng-${prNumber}`, {checkout: pullrequest.head.ref });
+                  await exec(`docker build -t quay.io/searxng/searxng-test-pr:${prHeadHash} -f searxng-${prNumber}/Dockerfile searxng-${prNumber}`);
+                  await exec(`docker push quay.io/searxng/searxng-test-pr:${prHeadHash}`);
+                  const optionsInstallRelease = {
+                      reuseValues: false,
+                      resetValues: true,
+                      chartName: "searxng/searxng",
+                      releaseName: "searxng",
+                      namespace: prNumber,
+                      version: "latest",
+                      install: true,
+                      values: {
+                          "image.repository": "quay.io/searxng/searxng-test-pr",
+                          "image.tag": prHeadHash,
+                          "searxng.config.server.secret_key": "secret",
+                          "env.BASE_URL": `https://${prNumber}.testpr.searxng.net`,
+                          "env.INSTANCE_NAME": `pr-${prNumber}`,
+                          "ingress.main.enabled": "true",
+                          "ingress.hosts[0].host": `${prNumber}.testpr.searxng.net,ingress.hosts[0].paths[0].path=/,ingress.hosts[0].paths[0].pathType=Prefix`,
+                          "ingress.tls[0].hosts[0]": `${prNumber}.testpr.searxng.net,ingress.tls[0].secretName=pr-${prNumber}`,
+                      }
+                  };
+                  await helm.upgradeAsync(optionsInstallRelease);
+                }
+              }
+                console.log(pullrequest.number)
+            }
+
