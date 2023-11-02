@@ -92,8 +92,8 @@ jobs:
                           "env.BASE_URL": `https://${prNumber}.testpr.searxng.net`,
                           "env.INSTANCE_NAME": `pr-${prNumber}`,
                           "ingress.main.enabled": true,
-                          "ingress.hosts[0].host": `${prNumber}.testpr.searxng.net,ingress.hosts[0].paths[0].path=/,ingress.hosts[0].paths[0].pathType=Prefix`,
-                          "ingress.tls[0].hosts[0]": `${prNumber}.testpr.searxng.net,ingress.tls[0].secretName=pr-${prNumber}`,
+                          "ingress.main.hosts[0].host": `${prNumber}.testpr.searxng.net,ingress.hosts[0].paths[0].path=/,ingress.hosts[0].paths[0].pathType=Prefix`,
+                          "ingress.main.tls[0].hosts[0]": `${prNumber}.testpr.searxng.net,ingress.tls[0].secretName=pr-${prNumber}`,
                       }
                   };
                   await helm.upgradeAsync(optionsInstallRelease);
