@@ -38,8 +38,6 @@ jobs:
             const k8s = require('@kubernetes/client-node');
             const helm = require('nodejs-helm');
             const clone = require('git-clone/promise');
-            const util = require('util');
-            const exec = util.promisify(require('child_process').exec);
             let Promise = require("bluebird");
 
             const Helm = require("nodejs-helm").Helm;
