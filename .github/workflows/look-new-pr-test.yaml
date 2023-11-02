@@ -48,6 +48,7 @@ jobs:
               owner: "searxng",
               repo: "searxng",
             })
+            console.log("have fetched all the PRs")
             for (const pullrequest of pullrequests.data) {
               if (pullrequest.labels.some(item => item.name === 'preview-environment')) {
                 const prNumber = pullrequest.number;
@@ -61,7 +62,11 @@ jobs:
                 try {
                   releaseImageTag = (await helm.getAsync(optionsGetReleaseInfo))[0].image.tag;
                 } catch (error) {
-                  await k8sApi.createNamespace(`searxng-${prNumber}`);
+                  await k8sApi.createNamespace({
+                    metadata: {
+                        name: `searxng-${prNumber}`,
+                    },
+                  });
                 }
                 if (releaseImageTag == "" || releaseImageTag != prHeadHash) {
                   clone(pullrequest.head.repo.clone_url, `searxng-${prNumber}`, {checkout: pullrequest.head.ref });
