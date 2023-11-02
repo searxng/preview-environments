@@ -73,7 +73,10 @@ jobs:
                 }
                 if (releaseImageTag == "" || releaseImageTag != prHeadHash) {
                   clone(pullrequest.head.repo.clone_url, `searxng-${prNumber}`, {checkout: pullrequest.head.ref });
-                  await exec.exec(`docker build -t quay.io/searxng/searxng-test-pr:${prHeadHash} -f searxng-${prNumber}/Dockerfile searxng-${prNumber}`);
+                  const optionsExec = {
+                    cwd: `./searxng-${prNumber}`
+                  }
+                  await exec.exec('docker', ["build", "-t", `quay.io/searxng/searxng-test-pr:${prHeadHash}`, "-f", "Dockerfile", "."], options);
                   await exec.exec(`docker push quay.io/searxng/searxng-test-pr:${prHeadHash}`);
                   const optionsInstallRelease = {
                       reuseValues: false,
