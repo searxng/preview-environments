@@ -84,7 +84,6 @@ jobs:
                       chartName: "searxng/searxng",
                       releaseName: "searxng",
                       namespace: prNumber,
-                      version: "latest",
                       install: true,
                       values: {
                           "image.repository": "quay.io/searxng/searxng-test-pr",
