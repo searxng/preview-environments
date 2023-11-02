@@ -49,7 +49,7 @@ jobs:
               repo: "searxng",
             })
             for (const pullrequest of pullrequests.data) {
-              if (pullrequest.labels.some(item => item.name === preview-environment')) {
+              if (pullrequest.labels.some(item => item.name === 'preview-environment')) {
                 const prNumber = pullrequest.number;
                 const prHeadHash = pullrequest.head.sha;
                 const optionsGetReleaseInfo = {
@@ -63,8 +63,7 @@ jobs:
                 } catch (error) {
                   await k8sApi.createNamespace(`searxng-${prNumber}`);
                 }
-                console currentDeployedReleases = await helm.listAsync(optionsGetReleases));
-                if (releaseImageTag == "" or releaseImageTag != prHeadHash)) {
+                if (releaseImageTag == "" || releaseImageTag != prHeadHash) {
                   clone(pullrequest.head.repo.clone_url, `searxng-${prNumber}`, {checkout: pullrequest.head.ref });
                   await exec(`docker build -t quay.io/searxng/searxng-test-pr:${prHeadHash} -f searxng-${prNumber}/Dockerfile searxng-${prNumber}`);
                   await exec(`docker push quay.io/searxng/searxng-test-pr:${prHeadHash}`);
