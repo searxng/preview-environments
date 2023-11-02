@@ -82,7 +82,7 @@ jobs:
                       resetValues: true,
                       chartName: "searxng/searxng",
                       releaseName: "searxng",
-                      namespace: prNumber,
+                      namespace: `searxng-${prNumber}`,
                       install: true,
                       values: {
                           "image.repository": "quay.io/searxng/searxng-test-pr",
