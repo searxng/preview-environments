@@ -10,6 +10,10 @@ jobs:
     name: Check whether a new PR has label preview-environment
     runs-on: ubuntu-latest
     steps:
+      - name: Disallow Concurrent Runs
+        uses: byu-oit/github-action-disallow-concurrent-runs@v2
+        with:
+          token: ${{ github.token }}
       - uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -54,7 +58,8 @@ jobs:
               state: "open",
             })
             for (const pullrequest of pullrequests.data) {
-              if (pullrequest.labels.some(item => item.name === 'preview-environment')) {
+              if (pullrequest.labels.some(item => item.name === 'preview-environment')
+                  || pullrequest.labels.some(item => item.name === 'preview-environment-commented')) {
                 const prNumber = pullrequest.number;
                 const prHeadHash = pullrequest.head.sha;
                 const optionsGetReleaseInfo = {
@@ -115,7 +120,13 @@ jobs:
                     issue_number: prNumber,
                     owner: "searxng",
                     repo: "searxng",
-                    labels: ['preview-environment-commented', 'preview-environment']
+                    labels: ['preview-environment-commented']
+                  })
+                  await github.rest.issues.removeLabel({
+                    issue_number: prNumber,
+                    owner: "searxng",
+                    repo: "searxng",
+                    name: 'preview-environment'
                   })
                 }
               }
