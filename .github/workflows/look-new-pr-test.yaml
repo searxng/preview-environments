@@ -65,7 +65,6 @@ jobs:
                 let releaseImageTag = "";
                 try {
                   const helmReleaseInfo = await helm.getAsync(optionsGetReleaseInfo);
-                  console.log(helmReleaseInfo)
                   releaseImageTag = helmReleaseInfo[0].image.tag;
                 } catch (error) {
                   try {
