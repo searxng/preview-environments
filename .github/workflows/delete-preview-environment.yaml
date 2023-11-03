@@ -59,6 +59,11 @@ jobs:
                     namespace: `searxng-${prNumber}`
                 }
                 await helm.deleteAsync(options);
+                await k8sApi.deleteNamespace({
+                  metadata: {
+                    name: `searxng-${prNumber}`,
+                  },
+                });
                 if (pullrequest.labels.some(item => item.name === 'preview-environment')) {
                   await github.rest.issues.removeLabel({
                     issue_number: prNumber,
