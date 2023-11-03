@@ -65,7 +65,7 @@ jobs:
                     namespace: `searxng-${prNumber}`
                 }
                 await helm.deleteAsync(options);
-                if (pullrequest.labels.some(item => item.name === 'preview-environment') {
+                if (pullrequest.labels.some(item => item.name === 'preview-environment')) {
                   await github.rest.issues.removeLabel({
                     issue_number: prNumber,
                     owner: "searxng",
@@ -74,7 +74,7 @@ jobs:
                   });
                 }
                   
-                if (pullrequest.labels.some(item => item.name === 'preview-environment-commented') {
+                if (pullrequest.labels.some(item => item.name === 'preview-environment-commented')) {
                   await github.rest.issues.removeLabel({
                     issue_number: prNumber,
                     owner: "searxng",
