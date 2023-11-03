@@ -3,7 +3,9 @@ name: Look for closed PR with label preview-environment
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "0 * * * *"
+
+concurrency: check_pr
 
 jobs:
   checks:
