@@ -74,6 +74,8 @@ jobs:
 
                   }
                 }
+                console.log(prNumber)
+                console.log(releaseImageTag)
                 if (releaseImageTag == "" || releaseImageTag != prHeadHash) {
                   await clone(pullrequest.head.repo.clone_url, `./searxng-${prNumber}`, {checkout: pullrequest.head.ref });
                   const optionsExec = {
@@ -101,19 +103,20 @@ jobs:
                   };
                   await helm.upgradeAsync(optionsInstallRelease);
                 }
+                console.log(pullrequest.labels)
                 if (pullrequest.labels.some(item => item.name !== 'preview-environment-commented')) {
-                  await github.rest.issues.createComment({
-                    issue_number: prNumber,
-                    owner: "searxng",
-                    repo: "searxng",
-                    body: `Preview environment deployed at https://${prNumber}.testpr.searxng.net`
-                  });
-                  await github.rest.issues.addLabels({
-                    issue_number: prNumber,
-                    owner: "searxng",
-                    repo: "searxng",
-                    labels: ['preview-environment-commented', 'preview-environment']
-                  })
+                  # await github.rest.issues.createComment({
+                  #   issue_number: prNumber,
+                  #   owner: "searxng",
+                  #   repo: "searxng",
+                  #   body: `Preview environment deployed at https://${prNumber}.testpr.searxng.net`
+                  # });
+                  # await github.rest.issues.addLabels({
+                  #   issue_number: prNumber,
+                  #   owner: "searxng",
+                  #   repo: "searxng",
+                  #   labels: ['preview-environment-commented', 'preview-environment']
+                  # })
                 }
               }
             }
