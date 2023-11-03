@@ -102,7 +102,7 @@ jobs:
                   await helm.upgradeAsync(optionsInstallRelease);
                 }
                 if (pullrequest.labels.some(item => item.name !== 'preview-environment-commented')) {
-                  github.issues.createComment({
+                  await github.issues.createComment({
                     issue_number: prNumber,
                     owner: "searxng",
                     repo: "searxng",
