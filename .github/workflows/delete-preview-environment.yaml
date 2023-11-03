@@ -1,0 +1,79 @@
+name: Look for closed PR with label preview-environment
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
+
+jobs:
+  checks:
+    name: Check whether a closed PR has label preview-environment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Helm Installation
+        uses: azure/setup-helm@v3
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+      - name: install npm packages and kubernetes
+        run: |
+          npm install @kubernetes/client-node nodejs-helm bluebird git-clone
+          mkdir -p ~/.kube
+          echo "$KUBECONFIG_TEXT" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          helm repo add searxng https://charts.searxng.org
+          helm repo update
+        env:
+          KUBECONFIG_TEXT: ${{secrets.KUBECONFIG_TEXT}}
+      - name: Login to Quay.io
+        uses: docker/login-action@v2
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+      - name: Check whether a closed PR has label preview-environment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GH_PAT }}
+          script: |
+            const k8s = require('@kubernetes/client-node');
+            const clone = require('git-clone/promise');
+            let Promise = require("bluebird");
+            const Helm = require("nodejs-helm").Helm;
+            let helm = Promise.promisifyAll(new Helm({helmCommand: "helm"}));
+
+            const kc = new k8s.KubeConfig();
+            kc.loadFromDefault();
+            const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+            const pullrequests = await github.rest.pulls.list({
+              owner: "searxng",
+              repo: "searxng",
+              per_page: 100,
+              state: "closed",
+            })
+            for (const pullrequest of pullrequests.data) {
+              if (pullrequest.labels.some(item => item.name === 'preview-environment')) {
+                const prNumber = pullrequest.number;
+                var options = {
+                    shouldPurge : true,
+                    releaseName: 'searxng-preview',
+                    namespace: `searxng-${prNumber}`
+                }
+                await helm.deleteAsync(options);
+                await github.rest.issues.removeLabel({
+                  issue_number: prNumber,
+                  owner: "searxng",
+                  repo: "searxng",
+                  name: 'preview-environment'
+                });
+                await github.rest.issues.removeLabel({
+                  issue_number: prNumber,
+                  owner: "searxng",
+                  repo: "searxng",
+                  name: 'preview-environment-commented'
+                })
+              }
+            }
+
