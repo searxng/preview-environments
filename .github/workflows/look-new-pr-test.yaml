@@ -64,11 +64,15 @@ jobs:
                 try {
                   releaseImageTag = (await helm.getAsync(optionsGetReleaseInfo))[0].image.tag;
                 } catch (error) {
-                  await k8sApi.createNamespace({
-                    metadata: {
-                        name: `searxng-${prNumber}`,
-                    },
-                  });
+                  try {
+                    await k8sApi.createNamespace({
+                      metadata: {
+                          name: `searxng-${prNumber}`,
+                      },
+                    });
+                  } catch (error) {
+
+                  }
                 }
                 if (releaseImageTag == "" || releaseImageTag != prHeadHash) {
                   await clone(pullrequest.head.repo.clone_url, `./searxng-${prNumber}`, {checkout: pullrequest.head.ref });
@@ -96,6 +100,20 @@ jobs:
                       }
                   };
                   await helm.upgradeAsync(optionsInstallRelease);
+                }
+                if (pullrequest.labels.some(item => item.name !== 'preview-environment-commented')) {
+                  github.issues.createComment({
+                    issue_number: prNumber,
+                    owner: "searxng",
+                    repo: "searxng",
+                    body: `Preview environment deployed at https://${prNumber}.testpr.searxng.net`
+                  });
+                  await github.rest.issues.addLabels({
+                    issue_number: prNumber,
+                    owner: "searxng",
+                    repo: "searxng",
+                    labels: ['preview-environment-commented', 'preview-environment']
+                  })
                 }
               }
             }
