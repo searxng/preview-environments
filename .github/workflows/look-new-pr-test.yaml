@@ -100,6 +100,7 @@ jobs:
                           "searxng.config.server.secret_key": "secret",
                           "env.BASE_URL": `https://${prNumber}.testpr.searxng.net`,
                           "env.INSTANCE_NAME": `pr-${prNumber}`,
+                          "env.UWSGI_WORKERS": '1',
                           "ingress.main.enabled": true,
                           "ingress.main.hosts[0].host": `${prNumber}.testpr.searxng.net,ingress.main.hosts[0].paths[0].path=/,ingress.main.hosts[0].paths[0].pathType=Prefix`,
                           "ingress.main.tls[0].hosts[0]": `${prNumber}.testpr.searxng.net,ingress.main.tls[0].secretName=pr-${prNumber}`,
