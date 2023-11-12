@@ -54,11 +54,10 @@ jobs:
                   || pullrequest.labels.some(item => item.name === 'preview-environment-commented')) {
                 const prNumber = pullrequest.number;
                 var options = {
-                    shouldPurge : true,
                     releaseName: 'searxng-preview',
                     namespace: `searxng-${prNumber}`
                 }
-                await helm.deleteAsync(options);
+                await helm.uninstallAsync(options);
                 await k8sApi.deleteNamespace({
                   metadata: {
                     name: `searxng-${prNumber}`,
