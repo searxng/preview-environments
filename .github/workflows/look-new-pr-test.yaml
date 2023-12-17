@@ -98,6 +98,7 @@ jobs:
                           "image.repository": "quay.io/searxng/searxng-test-pr",
                           "image.tag": prHeadHash,
                           "searxng.config.server.secret_key": "secret",
+                          "searxng.config.outgoing.proxies.all://[0]": "http://holaproxy-holaproxy.holaproxy.svc.cluster.local:8080",
                           "env.BASE_URL": `https://${prNumber}.testpr.searxng.net`,
                           "env.INSTANCE_NAME": `pr-${prNumber}`,
                           "env.UWSGI_WORKERS": '1',
