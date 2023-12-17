@@ -17,6 +17,12 @@ jobs:
           node-version: 16
       - name: Helm Installation
         uses: azure/setup-helm@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
       - name: install npm packages and kubernetes
@@ -85,8 +91,7 @@ jobs:
                   const optionsExec = {
                     cwd: `./searxng-${prNumber}`
                   }
-                  await exec.exec('docker', ["build", "--build-arg", "quay_expiration=300d", "-t", `quay.io/searxng/searxng-test-pr:${prHeadHash}`, "-f", "Dockerfile", "."], optionsExec);
-                  await exec.exec(`docker push quay.io/searxng/searxng-test-pr:${prHeadHash}`);
+                  await exec.exec('docker', ["buildx", "build", "--platform linux/amd64,linux/arm64", "--push", "--build-arg", "quay_expiration=300d", "-t", `quay.io/searxng/searxng-test-pr:${prHeadHash}`, "-f", "Dockerfile", "."], optionsExec);
                   const optionsInstallRelease = {
                       reuseValues: false,
                       resetValues: true,
