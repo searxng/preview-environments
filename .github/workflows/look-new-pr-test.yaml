@@ -91,7 +91,7 @@ jobs:
                   const optionsExec = {
                     cwd: `./searxng-${prNumber}`
                   }
-                  await exec.exec('docker', ["buildx", "build", "--platform linux/amd64,linux/arm64", "--push", "--build-arg", "quay_expiration=300d", "-t", `quay.io/searxng/searxng-test-pr:${prHeadHash}`, "-f", "Dockerfile", "."], optionsExec);
+                  await exec.exec('docker', ["buildx", "build", "--platform", "linux/amd64,linux/arm64", "--push", "--build-arg", "quay_expiration=300d", "-t", `quay.io/searxng/searxng-test-pr:${prHeadHash}`, "-f", "Dockerfile", "."], optionsExec);
                   const optionsInstallRelease = {
                       reuseValues: false,
                       resetValues: true,
